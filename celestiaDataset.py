@@ -1,9 +1,9 @@
 from __future__ import print_function, division
 import os
 import torch
-from skimage import io, transform, color
+from skimage import io
 import numpy as np
-from torch.utils.data import Dataset, DataLoader
+from torch.utils.data import Dataset
 
 class celestiaDataset(Dataset):
     """Celestia dataset."""
@@ -29,8 +29,8 @@ class celestiaDataset(Dataset):
         imgFullName = os.path.join(self.root_dir,
                                 self.sampleList[idx])
         image = io.imread(imgFullName)
-        coords = self.sampleList[idx].split("_")[1:4]
-        coords = np.array([coords])
+        coords = self.sampleList[idx][:-4].split("_")[1:4]
+        coords = np.array([coords], dtype = int)
         sample = {'image': image, 'coords': coords}
 
         if self.transform:
@@ -39,23 +39,23 @@ class celestiaDataset(Dataset):
         return sample
 
 
-class ToGrayscale(object):
-    """Convert image to grayscale"""
+# class ToGrayscale(object):
+#     """Convert image to grayscale"""
 
-    def __call__(self, sample):
-        image, coords = sample["image"],  sample["coords"]
-        return {'image': color.rgb2gray(image),
-                'coords': coords}
+#     def __call__(self, sample):
+#         image, coords = sample["image"],  sample["coords"]
+#         return {'image': color.rgb2gray(image),
+#                 'coords': coords}
     
-class ToTensor(object):
-    """Convert ndarrays in sample to Tensors."""
+# class ToTensor(object):
+#     """Convert ndarrays in sample to Tensors."""
 
-    def __call__(self, sample):
-        image, coords = sample["image"],  sample["coords"]
+#     def __call__(self, sample):
+#         image, coords = sample["image"],  sample["coords"]
 
-        # swap color axis because
-        # numpy image: H x W x C
-        # torch image: C x H x W
-        image = image.transpose(2, 0, 1)
-        return {'image': torch.from_numpy(image),
-                'coords': torch.from_numpy(coords)}
+#         # swap color axis because
+#         # numpy image: H x W x C
+#         # torch image: C x H x W
+#         image = image.transpose((2, 0, 1))
+#         return {'image': torch.from_numpy(image),
+#                 'coords': torch.from_numpy(coords)}
