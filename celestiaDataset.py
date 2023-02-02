@@ -17,22 +17,30 @@ class celestiaDataset(Dataset):
         """
         self.root_dir = root_dir
         self.transform = transform
+        # Create a sorted list of all files in directory
         self.sampleList = sorted(os.listdir(root_dir))
 
     def __len__(self):
         return len(self.sampleList)
 
     def __getitem__(self, idx):
+        # Convert tensor to list if necessary
         if torch.is_tensor(idx):
             idx = idx.tolist()
-
+        
+        # Get path of image file and read it
         imgFullName = os.path.join(self.root_dir,
                                 self.sampleList[idx])
         image = io.imread(imgFullName)
+
+        # Slice the file name to get the coordinates of the sample
         coords = self.sampleList[idx][:-4].split("_")[1:4]
         coords = np.array([coords], dtype = int)
+
+        # Create sample object
         sample = {'image': image, 'coords': coords}
 
+        # Apply transformation if specified
         if self.transform:
             sample = self.transform(sample)
 
