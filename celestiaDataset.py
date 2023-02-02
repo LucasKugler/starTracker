@@ -37,14 +37,13 @@ class celestiaDataset(Dataset):
         coords = self.sampleList[idx][:-4].split("_")[1:4]
         coords = np.array([coords], dtype = int)
 
-        # Create sample object
-        sample = {'image': image, 'coords': coords}
-
         # Apply transformation if specified
         if self.transform:
-            sample = self.transform(sample)
+            image = self.transform(image)
+        if self.target_transform:
+            label = self.target_transform(label)
 
-        return sample
+        return image, coords
 
 
 # class ToGrayscale(object):
