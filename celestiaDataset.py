@@ -8,7 +8,7 @@ from torch.utils.data import Dataset
 class celestiaDataset(Dataset):
     """Celestia dataset."""
 
-    def __init__(self, root_dir, transform=None):
+    def __init__(self, root_dir, transform=None, target_transform=None):
         """
         Args:
             root_dir (string): Directory with all the images.
@@ -17,6 +17,7 @@ class celestiaDataset(Dataset):
         """
         self.root_dir = root_dir
         self.transform = transform
+        self.target_transform =target_transform
         # Create a sorted list of all files in directory
         self.sampleList = sorted(os.listdir(root_dir))
 
@@ -35,7 +36,8 @@ class celestiaDataset(Dataset):
 
         # Slice the file name to get the coordinates of the sample
         coords = self.sampleList[idx][:-4].split("_")[1:4]
-        coords = np.array([coords], dtype = int)
+        coords = np.array([coords], dtype = np.float32)
+        coords = coords/60
 
         # Apply transformation if specified
         if self.transform:

@@ -30,7 +30,7 @@ for i in range(len(celestia_dataset)):
         plt.show()
         break
 
-
+################################################################
 
 transformed_dataset = celestiaDataset(root_dir='samples/Set1',transform=ToTensor())
 
@@ -42,3 +42,10 @@ for i in range(len(transformed_dataset)):
 
     if i == 3:
         break
+
+################################################################
+
+for epoch in range(nEpochs):
+    for i, (image,coords) in enumerate(trainLoader):
+        if (i+1)%5 == 0:
+            print(f'epoch {epoch+1}/{nEpochs}, step {i+1}/{nIterations}, inputs {image.shape}')
