@@ -3,23 +3,30 @@ import torch.nn as nn
 import torch.nn.functional as f
 
 class StarTConv(nn.Module):
-    def __init__(self):
+    def __init__(self, quarters=False):
         super(StarTConv, self).__init__()
+        if quarters == True:
+            outputDim = 4
+        else:
+            outputDim = 3
+    
         self.flatten = nn.Flatten()
-        self.conv1 = nn.Conv2d(1,3,5,2)
+        self.conv1 = nn.Conv2d(1,32,3)
         self.pool = nn.MaxPool2d(2,2)
-        self.conv2 = nn.Conv2d(3,8,5)
-        self.fc1 = nn.Linear(8*12*7,120)
-        self.fc2 = nn.Linear(120,50)
-        self.fc3 = nn.Linear(50,3)
+        self.drop = nn.Dropout2d(0.5)
+        self.conv2 = nn.Conv2d(32,64,3)
+        self.conv3 = nn.Conv2d(64,128,3)
+        self.fc1 = nn.Linear(128*13*8,128)
+        self.fc2 = nn.Linear(128,outputDim)
+        self.sm = nn.Softmax()
 
     def forward(self, x):
-        out = self.pool(f.relu(self.conv1(x)))
-        out = self.pool(f.relu(self.conv2(x)))
-        out = out.view(-1, 8*12*7)
-        out = f.relu(self.fc1(out))
-        out = f.relu(self.fc2(out))
-        out = self.fc3(out)
+        out = self.drop(self.pool(f.relu(self.conv1(x))))
+        out = self.drop(self.pool(f.relu(self.conv2(out))))
+        out = self.drop(self.pool(f.relu(self.conv3(out))))
+        out = out.view(-1, 128*13*8)
+        out = self.drop(f.relu(self.fc1(out)))
+        out = self.sm(self.fc2(out))
         
         return out
 

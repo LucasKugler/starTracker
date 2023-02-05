@@ -8,7 +8,7 @@ from torch.utils.data import Dataset
 class celestiaDataset(Dataset):
     """Celestia dataset."""
 
-    def __init__(self, root_dir, transform=None, target_transform=None):
+    def __init__(self, root_dir, quarters=False, transform=None, target_transform=None):
         """
         Args:
             root_dir (string): Directory with all the images.
@@ -16,6 +16,7 @@ class celestiaDataset(Dataset):
                 on a sample.
         """
         self.root_dir = root_dir
+        self.quarters = quarters
         self.transform = transform
         self.target_transform =target_transform
         # Create a sorted list of all files in directory
@@ -34,10 +35,20 @@ class celestiaDataset(Dataset):
                                 self.sampleList[idx])
         image = io.imread(imgFullName)
 
-        # Slice the file name to get the coordinates of the sample
-        coords = self.sampleList[idx][:-4].split("_")[1:4]
-        coords = np.array([coords], dtype = np.float32)
-        coords = coords/60
+        if self.quarters == False:
+            # Slice the file name to get the coordinates of the sample
+            labels = self.sampleList[idx][:-4].split("_")[1:4]
+            labels = np.array([labels], dtype = np.float32)
+        else:
+            label = self.sampleList[idx][-6:-4]
+            if label == "NE":
+                labels = np.array([1,0,0,0], dtype = np.float32)
+            elif label == "NW":
+                labels = np.array([0,1,0,0], dtype = np.float32)
+            elif label == "SE":
+                labels = np.array([0,0,1,0], dtype = np.float32)
+            elif label == "SW":
+                labels = np.array([0,0,0,1], dtype = np.float32)
 
         # Apply transformation if specified
         if self.transform:
@@ -45,8 +56,14 @@ class celestiaDataset(Dataset):
         if self.target_transform:
             label = self.target_transform(label)
 
-        return image, coords
+        return image, labels
 
+
+class scaleLabels(object):
+    """Scale label range"""
+
+    def __call__(self, labels, factor):
+        return labels/factor
 
 # class ToGrayscale(object):
 #     """Convert image to grayscale"""
